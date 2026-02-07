@@ -3,143 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SocialXP</title>
+    <title>Social Progress Tracker</title>
     <style>
-        :root { --bg: #000; --card: #121212; --accent: #0088ff; --text: #fff; --panel: #1a1a1a; --danger: #ff5555; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-top: 100px; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --dot-off: #333; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; padding-top: 100px; }
         
-        #header { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 20px; z-index: 1000; border-bottom: 1px solid #222; }
-        .bar-bg { background: #222; border-radius: 4px; height: 10px; width: 100%; margin-top: 8px; overflow: hidden; }
-        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
+        #header { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); padding: 20px; z-index: 1000; border-bottom: 1px solid #222; }
+        .bar-bg { background: #222; border-radius: 4px; height: 8px; width: 100%; margin-top: 8px; }
+        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.3s; border-radius: 4px; }
         
-        .card { background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #222; position: relative; }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .task-name { font-size: 1.2rem; font-weight: bold; color: var(--accent); margin: 0; }
-        .goal-display { font-size: 0.85rem; color: #888; margin-top: 4px; font-weight: 500; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #222; }
+        .task-title { font-size: 1.2rem; font-weight: bold; color: var(--accent); margin-bottom: 15px; display: flex; justify-content: space-between; }
         
-        .pct-label { font-size: 0.9rem; font-weight: 800; color: #fff; text-align: right; margin-bottom: 4px; }
-        .rep-container { display: flex; align-items: center; gap: 15px; margin: 15px 0; }
-        .rep-counter { font-size: 2rem; font-weight: 900; min-width: 40px; text-align: center; }
+        .grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .day-row { display: flex; align-items: center; gap: 10px; }
+        .day-label { font-size: 0.7rem; color: #666; width: 40px; }
+        .reps { display: flex; gap: 8px; }
         
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--panel); width: 100%; max-width: 400px; padding: 25px; border-radius: 20px; }
-        .modal input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-        
-        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; padding: 14px; }
-        .btn-primary { background: var(--accent); color: #fff; width: 100%; margin-top: 10px; }
-        .circle-btn { width: 45px; height: 45px; border-radius: 50%; background: #222; color: var(--accent); border: 1px solid #333; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
+        .dot { width: 25px; height: 25px; border-radius: 6px; background: var(--dot-off); cursor: pointer; transition: 0.2s; border: 1px solid #444; }
+        .dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 2000; }
+        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; }
+        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; margin: 10px 0; box-sizing: border-box; border-radius: 8px; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="header">
-    <div style="display:flex; justify-content:space-between; align-items: flex-end; margin-bottom: 5px;">
-        <strong style="font-size: 0.75rem; color: #666; letter-spacing: 1px;">TOTAL SOCIAL PROGRESS</strong>
-        <span id="ov-text" style="color:var(--accent); font-weight:bold; font-size: 1.5rem;">0%</span>
+    <div style="display:flex; justify-content:space-between;">
+        <span style="font-size:0.8rem; color:#888;">OVERALL PROGRESS</span>
+        <span id="ov-text" style="color:var(--accent); font-weight:bold;">0%</span>
     </div>
     <div class="bar-bg"><div id="ov-bar" class="bar-fill"></div></div>
 </div>
 
 <div id="list"></div>
-<button class="btn btn-primary" onclick="addTask()" style="background: #111; color: var(--accent); border: 1px solid #333;">+ NEW SOCIAL MISSION</button>
+<button class="btn" onclick="openModal()" style="margin-top: 20px;">+ ADD NEW TASK</button>
 
-<div id="taskModal" class="modal">
+<div id="modal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle" style="margin-top:0; color: var(--accent);">Mission Settings</h3>
-        <label>Mission Name</label><input type="text" id="mName" placeholder="e.g. Talk to strangers">
-        <label>Current Day</label><input type="number" id="mCurrDay">
-        <label>Goal Days (Duration)</label><input type="number" id="mGoalDays">
-        <label>Daily Rep Goal</label><input type="number" id="mDailyGoal">
-        <button class="btn btn-primary" onclick="saveTask()">SAVE MISSION</button>
-        <button class="btn" onclick="closeModal()" style="background:transparent; color:#888; width:100%;">CANCEL</button>
-        <button class="btn" onclick="deleteTask()" style="color:var(--danger); font-size:0.7rem; width:100%; margin-top:20px;">DELETE MISSION</button>
+        <h3 style="color:var(--accent)">New Task</h3>
+        <input type="text" id="taskName" placeholder="Task Name (e.g. Compliment Strangers)">
+        <input type="number" id="goalDays" placeholder="Goal Days (e.g. 5)">
+        <input type="number" id="goalReps" placeholder="Reps Per Day (e.g. 3)">
+        <button class="btn" onclick="addTask()">CREATE TASK</button>
+        <button class="btn" onclick="closeModal()" style="background:none; color:#888;">Cancel</button>
     </div>
 </div>
 
 <script>
-    let tasks = JSON.parse(localStorage.getItem('socialTasks')) || [];
-    let editIdx = null;
+    let tasks = JSON.parse(localStorage.getItem('socialProgress')) || [];
 
-    function saveToLocal() {
-        localStorage.setItem('socialTasks', JSON.stringify(tasks));
-        render();
-    }
+    function openModal() { document.getElementById('modal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
     function addTask() {
-        editIdx = tasks.length;
-        tasks.push({ name: "New Mission", currDay: 0, goalDays: 30, dailyGoal: 3, currReps: 0 });
-        openModal(editIdx);
-    }
-
-    function openModal(i) {
-        editIdx = i;
-        const t = tasks[i];
-        document.getElementById('mName').value = t.name;
-        document.getElementById('mCurrDay').value = t.currDay;
-        document.getElementById('mGoalDays').value = t.goalDays;
-        document.getElementById('mDailyGoal').value = t.dailyGoal;
-        document.getElementById('taskModal').style.display = 'flex';
-    }
-
-    function saveTask() {
-        tasks[editIdx].name = document.getElementById('mName').value;
-        tasks[editIdx].currDay = parseInt(document.getElementById('mCurrDay').value) || 0;
-        tasks[editIdx].goalDays = parseInt(document.getElementById('mGoalDays').value) || 1;
-        tasks[editIdx].dailyGoal = parseInt(document.getElementById('mDailyGoal').value) || 1;
-        closeModal();
-    }
-
-    function deleteTask() {
-        if(confirm("End this mission?")) {
-            tasks.splice(editIdx, 1);
+        const name = document.getElementById('taskName').value;
+        const days = parseInt(document.getElementById('goalDays').value);
+        const reps = parseInt(document.getElementById('goalReps').value);
+        
+        if (name && days && reps) {
+            tasks.push({
+                name,
+                days,
+                repsPerDay: reps,
+                completed: [] // Stores indices of clicked dots
+            });
+            saveAndRender();
             closeModal();
         }
     }
 
-    function closeModal() {
-        document.getElementById('taskModal').style.display = 'none';
-        saveToLocal();
+    function toggleDot(taskIdx, dotIdx) {
+        const t = tasks[taskIdx];
+        const index = t.completed.indexOf(dotIdx);
+        if (index > -1) t.completed.splice(index, 1);
+        else t.completed.push(dotIdx);
+        saveAndRender();
     }
 
-    function adjustRep(i, amt) {
-        tasks[i].currReps = Math.max(0, tasks[i].currReps + amt);
-        saveToLocal();
-    }
-
-    function render() {
+    function saveAndRender() {
+        localStorage.setItem('socialProgress', JSON.stringify(tasks));
         const list = document.getElementById('list');
         list.innerHTML = '';
-        let totalPct = 0;
+        let totalDots = 0;
+        let totalCompleted = 0;
 
-        tasks.forEach((t, i) => {
-            const pct = Math.min((t.currDay / t.goalDays) * 100, 100);
-            totalPct += pct;
+        tasks.forEach((t, tIdx) => {
+            const taskTotal = t.days * t.repsPerDay;
+            const taskDone = t.completed.length;
+            const taskPct = (taskDone / taskTotal) * 100;
+            totalDots += taskTotal;
+            totalCompleted += taskDone;
+
+            let gridHtml = '';
+            for (let d = 0; d < t.days; d++) {
+                gridHtml += `<div class="day-row"><div class="day-label">Day ${d+1}</div><div class="reps">`;
+                for (let r = 0; r < t.repsPerDay; r++) {
+                    const dotIdx = (d * t.repsPerDay) + r;
+                    const active = t.completed.includes(dotIdx) ? 'active' : '';
+                    gridHtml += `<div class="dot ${active}" onclick="toggleDot(${tIdx}, ${dotIdx})"></div>`;
+                }
+                gridHtml += `</div></div>`;
+            }
+
             list.innerHTML += `
                 <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h2 class="task-name">${t.name}</h2>
-                            <div class="goal-display">Day ${t.currDay} of ${t.goalDays} • Goal: ${t.dailyGoal} daily</div>
-                        </div>
-                        <button onclick="openModal(${i})" style="background:none; border:none; color:#555; font-size:1.2rem;">⋮</button>
+                    <div class="task-title">
+                        ${t.name}
+                        <span style="font-size:0.8rem; color:#888" onclick="deleteTask(${tIdx})">✕</span>
                     </div>
-                    <div class="rep-container">
-                        <button class="circle-btn" onclick="adjustRep(${i}, -1)">−</button>
-                        <div class="rep-counter">${t.currReps}</div>
-                        <button class="circle-btn" onclick="adjustRep(${i}, 1)">+</button>
-                        <span style="color:#555; font-size:0.8rem;">TODAY'S REPS</span>
-                    </div>
-                    <div class="pct-label">${pct.toFixed(1)}%</div>
-                    <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                    <div class="grid">${gridHtml}</div>
+                    <div class="bar-bg"><div class="bar-fill" style="width:${taskPct}%"></div></div>
                 </div>`;
         });
 
-        const overall = tasks.length ? (totalPct / tasks.length).toFixed(1) : 0;
+        const overall = totalDots > 0 ? (totalCompleted / totalDots * 100).toFixed(1) : 0;
         document.getElementById('ov-text').innerText = overall + '%';
         document.getElementById('ov-bar').style.width = overall + '%';
     }
 
-    render();
+    function deleteTask(i) {
+        if(confirm("Delete task?")) {
+            tasks.splice(i, 1);
+            saveAndRender();
+        }
+    }
+
+    saveAndRender();
 </script>
 </body>
 </html>
