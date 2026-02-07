@@ -3,221 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Total Human PWA</title>
+    <title>SocialXP</title>
     <style>
-        :root { --bg: #000; --card: #121212; --accent: #00ff88; --text: #fff; --panel: #1a1a1a; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #000; --card: #121212; --accent: #0088ff; --text: #fff; --panel: #1a1a1a; --danger: #ff5555; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-top: 100px; -webkit-tap-highlight-color: transparent; }
         
-        /* Layout */
-        .page { display: none; padding: 20px; }
-        .active { display: block; }
+        #header { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); padding: 20px; z-index: 1000; border-bottom: 1px solid #222; }
+        .bar-bg { background: #222; border-radius: 4px; height: 10px; width: 100%; margin-top: 8px; overflow: hidden; }
+        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
         
-        /* Persistent Header */
-        #header { position: sticky; top: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); padding: 20px; z-index: 1000; border-bottom: 1px solid #222; }
-        .total-val { font-size: 2.5rem; font-weight: 900; color: var(--accent); text-align: center; }
+        .card { background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #222; position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .task-name { font-size: 1.2rem; font-weight: bold; color: var(--accent); margin: 0; }
+        .goal-display { font-size: 0.85rem; color: #888; margin-top: 4px; font-weight: 500; }
         
-        /* Roadmap Bars */
-        .roadmap { position: relative; background: #222; border-radius: 4px; height: 12px; width: 100%; margin: 15px 0; overflow: hidden; }
-        .roadmap-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
-        .marker { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; opacity: 0.6; z-index: 5; }
-
-        /* Focus Toggle */
-        .focus-row { display: flex; gap: 8px; margin-bottom: 20px; }
-        .focus-btn { flex: 1; background: #111; border: 1px solid #333; color: #666; padding: 10px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .focus-btn.active { border-color: var(--accent); color: var(--accent); background: #00ff8811; }
-
-        /* Pillar Grid */
-        .pillar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .pillar-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; cursor: pointer; }
-
-        /* Lift Cards */
-        .lift-card { background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #222; }
-        .lift-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .set-container { display: flex; gap: 8px; margin: 15px 0; overflow-x: auto; }
-        .rep-in { background: #222; border: 1px solid #333; color: #fff; width: 50px; height: 50px; text-align: center; border-radius: 10px; font-size: 1.2rem; font-weight: bold; }
+        .pct-label { font-size: 0.9rem; font-weight: 800; color: #fff; text-align: right; margin-bottom: 4px; }
+        .rep-container { display: flex; align-items: center; gap: 15px; margin: 15px 0; }
+        .rep-counter { font-size: 2rem; font-weight: 900; min-width: 40px; text-align: center; }
         
-        /* Modal */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--panel); width: 100%; max-width: 400px; padding: 25px; border-radius: 20px; max-height: 90vh; overflow-y: auto; }
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        label { font-size: 0.65rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; }
-        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; }
-        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; padding: 14px; width: 100%; margin-top: 15px; }
-        .btn-primary { background: var(--accent); color: #000; }
-        .btn-back { background: transparent; color: #888; border: 1px solid #333; width: auto; padding: 8px 15px; margin-bottom: 15px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--panel); width: 100%; max-width: 400px; padding: 25px; border-radius: 20px; }
+        .modal input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        
+        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; padding: 14px; }
+        .btn-primary { background: var(--accent); color: #fff; width: 100%; margin-top: 10px; }
+        .circle-btn { width: 45px; height: 45px; border-radius: 50%; background: #222; color: var(--accent); border: 1px solid #333; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
 <div id="header">
-    <div style="text-align: center; font-size: 0.7rem; color: #666; letter-spacing: 2px;">TOTAL HUMAN PROGRESS</div>
-    <div id="ov-text" class="total-val">0%</div>
-    <div class="roadmap" id="main-roadmap">
-        <div id="ov-bar" class="roadmap-fill"></div>
+    <div style="display:flex; justify-content:space-between; align-items: flex-end; margin-bottom: 5px;">
+        <strong style="font-size: 0.75rem; color: #666; letter-spacing: 1px;">TOTAL SOCIAL PROGRESS</strong>
+        <span id="ov-text" style="color:var(--accent); font-weight:bold; font-size: 1.5rem;">0%</span>
     </div>
+    <div class="bar-bg"><div id="ov-bar" class="bar-fill"></div></div>
 </div>
 
-<div id="home-page" class="page active">
-    <div class="pillar-grid">
-        <div class="pillar-card" onclick="showPage('titan-page')">
-            <div style="color: #666; font-size: 0.6rem; letter-spacing: 1px;">THE TITAN</div>
-            <strong style="display: block; margin: 10px 0; font-size: 1.2rem;">Body</strong>
-            <div id="titan-pct" style="color: var(--accent); font-weight: bold;">0%</div>
-        </div>
-        <div class="pillar-card"><div style="color: #444;">THE ARCHITECT</div></div>
-        <div class="pillar-card"><div style="color: #444;">THE ENVOY</div></div>
-        <div class="pillar-card"><div style="color: #444;">THE MONK</div></div>
-    </div>
-</div>
+<div id="list"></div>
+<button class="btn btn-primary" onclick="addTask()" style="background: #111; color: var(--accent); border: 1px solid #333;">+ NEW SOCIAL MISSION</button>
 
-<div id="titan-page" class="page">
-    <button class="btn btn-back" onclick="showPage('home-page')">← HOME</button>
-    
-    <div class="focus-row">
-        <button class="focus-btn active" id="f-super" onclick="setFocus('super')">Superhero</button>
-        <button class="focus-btn" id="f-greek" onclick="setFocus('greek')">Greek God</button>
-        <button class="focus-btn" id="f-warrior" onclick="setFocus('warrior')">Warrior</button>
-    </div>
-
-    <div id="lift-list"></div>
-    <button class="btn btn-primary" onclick="addLift()" style="background: #111; color: var(--accent); border: 1px solid #333;">+ ADD EXERCISE</button>
-</div>
-
-<div id="editModal" class="modal">
+<div id="taskModal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle" style="margin: 0 0 20px 0; color: var(--accent);">Lift Settings</h3>
-        <label>Exercise Name</label><input type="text" id="eName">
-        <div class="modal-grid">
-            <div><label>Start Wt</label><input type="number" id="eStart"></div>
-            <div><label>Current Wt</label><input type="number" id="eCurr"></div>
-            <div><label>Warrior Goal</label><input type="number" id="eGoalW"></div>
-            <div><label>Greek Goal</label><input type="number" id="eGoalG"></div>
-            <div><label>Super Goal</label><input type="number" id="eGoalS"></div>
-            <div><label>Increment</label><input type="number" id="eInc"></div>
-            <div><label>Min Reps</label><input type="number" id="eMin"></div>
-            <div><label>Max Reps</label><input type="number" id="eMax"></div>
-        </div>
-        <button class="btn btn-primary" onclick="saveEdit()">SAVE ALL GOALS</button>
-        <button class="btn" onclick="closeModal()" style="background: #222; color: #fff;">CANCEL</button>
+        <h3 id="modalTitle" style="margin-top:0; color: var(--accent);">Mission Settings</h3>
+        <label>Mission Name</label><input type="text" id="mName" placeholder="e.g. Talk to strangers">
+        <label>Current Day</label><input type="number" id="mCurrDay">
+        <label>Goal Days (Duration)</label><input type="number" id="mGoalDays">
+        <label>Daily Rep Goal</label><input type="number" id="mDailyGoal">
+        <button class="btn btn-primary" onclick="saveTask()">SAVE MISSION</button>
+        <button class="btn" onclick="closeModal()" style="background:transparent; color:#888; width:100%;">CANCEL</button>
+        <button class="btn" onclick="deleteTask()" style="color:var(--danger); font-size:0.7rem; width:100%; margin-top:20px;">DELETE MISSION</button>
     </div>
 </div>
 
 <script>
-    let lifts = JSON.parse(localStorage.getItem('th_lifts_v2')) || [];
-    let currentEditIdx = null;
-    let focusTier = 'super'; // super, greek, warrior
+    let tasks = JSON.parse(localStorage.getItem('socialTasks')) || [];
+    let editIdx = null;
 
-    function setFocus(tier) {
-        focusTier = tier;
-        document.querySelectorAll('.focus-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`f-${tier}`).classList.add('active');
+    function saveToLocal() {
+        localStorage.setItem('socialTasks', JSON.stringify(tasks));
         render();
     }
 
-    function showPage(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        render();
+    function addTask() {
+        editIdx = tasks.length;
+        tasks.push({ name: "New Mission", currDay: 0, goalDays: 30, dailyGoal: 3, currReps: 0 });
+        openModal(editIdx);
     }
 
-    function calculate(l, forceTier = null) {
-        const active = forceTier || focusTier;
-        let target = l.goalS;
-        if(active === 'warrior') target = l.goalW;
-        if(active === 'greek') target = l.goalG;
-
-        if (!target || target <= l.start) return 0;
-        
-        const ptsPerLevel = (l.maxR - l.minR) * l.sets.length;
-        const totalSteps = (target - l.start) / l.inc;
-        const maxPoints = (totalSteps * ptsPerLevel) + ptsPerLevel;
-        
-        const weightPoints = ((l.curr - l.start) / l.inc) * ptsPerLevel;
-        const repPoints = l.sets.reduce((sum, r) => sum + Math.max(0, Math.min(r - l.minR, l.maxR - l.minR)), 0);
-        
-        return Math.max(0, Math.min(100, ((weightPoints + repPoints) / maxPoints) * 100));
+    function openModal(i) {
+        editIdx = i;
+        const t = tasks[i];
+        document.getElementById('mName').value = t.name;
+        document.getElementById('mCurrDay').value = t.currDay;
+        document.getElementById('mGoalDays').value = t.goalDays;
+        document.getElementById('mDailyGoal').value = t.dailyGoal;
+        document.getElementById('taskModal').style.display = 'flex';
     }
 
-    function render() {
-        const list = document.getElementById('lift-list');
-        list.innerHTML = '';
-        let totalSum = 0;
-
-        lifts.forEach((l, i) => {
-            const pct = calculate(l);
-            totalSum += calculate(l, 'super'); // Global progress always scales to Super
-
-            const markers = (focusTier === 'super') ? `
-                <div class="marker" style="left: ${((l.goalW - l.start) / (l.goalS - l.start)) * 100}%"></div>
-                <div class="marker" style="left: ${((l.goalG - l.start) / (l.goalS - l.start)) * 100}%"></div>
-            ` : '';
-
-            list.innerHTML += `
-                <div class="lift-card">
-                    <div class="lift-header">
-                        <div>
-                            <strong>${l.name}</strong>
-                            <div style="font-size: 0.75rem; color: #666;">${l.curr}kg / Goal: ${focusTier === 'warrior' ? l.goalW : focusTier === 'greek' ? l.goalG : l.goalS}kg</div>
-                        </div>
-                        <button onclick="openModal(${i})" style="background:none; border:none; color:#444;">⋮</button>
-                    </div>
-                    <div class="set-container">
-                        ${l.sets.map((r, si) => `<input type="number" class="rep-in" value="${r}" onchange="updateReps(${i}, ${si}, this.value)">`).join('')}
-                    </div>
-                    <div class="roadmap">${markers}<div class="roadmap-fill" style="width: ${pct}%"></div></div>
-                </div>`;
-        });
-
-        const finalPct = lifts.length ? (totalSum / lifts.length) : 0;
-        document.getElementById('ov-text').innerText = finalPct.toFixed(1) + '%';
-        document.getElementById('ov-bar').style.width = finalPct + '%';
-        document.getElementById('titan-pct').innerText = finalPct.toFixed(1) + '%';
-        
-        const header = document.getElementById('main-roadmap');
-        header.querySelectorAll('.marker').forEach(m => m.remove());
-        if (lifts.length && focusTier === 'super') {
-            const avgW = lifts.reduce((s, l) => s + ((l.goalW - l.start) / (l.goalS - l.start)) * 100, 0) / lifts.length;
-            const avgG = lifts.reduce((s, l) => s + ((l.goalG - l.start) / (l.goalS - l.start)) * 100, 0) / lifts.length;
-            header.insertAdjacentHTML('afterbegin', `<div class="marker" style="left: ${avgW}%"></div><div class="marker" style="left: ${avgG}%"></div>`);
-        }
-
-        localStorage.setItem('th_lifts_v2', JSON.stringify(lifts));
-    }
-
-    window.openModal = (i) => {
-        currentEditIdx = i; const l = lifts[i];
-        document.getElementById('eName').value = l.name;
-        document.getElementById('eStart').value = l.start;
-        document.getElementById('eCurr').value = l.curr;
-        document.getElementById('eGoalW').value = l.goalW;
-        document.getElementById('eGoalG').value = l.goalG;
-        document.getElementById('eGoalS').value = l.goalS;
-        document.getElementById('eInc').value = l.inc;
-        document.getElementById('eMin').value = l.minR;
-        document.getElementById('eMax').value = l.maxR;
-        document.getElementById('editModal').style.display = 'flex';
-    }
-
-    window.saveEdit = () => {
-        const l = lifts[currentEditIdx];
-        l.name = document.getElementById('eName').value;
-        l.start = parseFloat(document.getElementById('eStart').value) || 0;
-        l.curr = parseFloat(document.getElementById('eCurr').value) || 0;
-        l.goalW = parseFloat(document.getElementById('eGoalW').value) || 0;
-        l.goalG = parseFloat(document.getElementById('eGoalG').value) || 0;
-        l.goalS = parseFloat(document.getElementById('eGoalS').value) || 0;
-        l.inc = parseFloat(document.getElementById('eInc').value) || 2.5;
-        l.minR = parseInt(document.getElementById('eMin').value) || 8;
-        l.maxR = parseInt(document.getElementById('eMax').value) || 12;
+    function saveTask() {
+        tasks[editIdx].name = document.getElementById('mName').value;
+        tasks[editIdx].currDay = parseInt(document.getElementById('mCurrDay').value) || 0;
+        tasks[editIdx].goalDays = parseInt(document.getElementById('mGoalDays').value) || 1;
+        tasks[editIdx].dailyGoal = parseInt(document.getElementById('mDailyGoal').value) || 1;
         closeModal();
     }
 
-    window.updateReps = (li, si, val) => { lifts[li].sets[si] = parseInt(val) || 0; render(); }
-    window.closeModal = () => { document.getElementById('editModal').style.display = 'none'; render(); }
-    window.addLift = () => {
-        lifts.push({ name: "New Exercise", start: 0, curr: 0, goalW: 0, goalG: 0, goalS: 0, inc: 2.5, minR: 8, maxR: 12, sets: [8,8,8] });
-        openModal(lifts.length - 1);
+    function deleteTask() {
+        if(confirm("End this mission?")) {
+            tasks.splice(editIdx, 1);
+            closeModal();
+        }
     }
+
+    function closeModal() {
+        document.getElementById('taskModal').style.display = 'none';
+        saveToLocal();
+    }
+
+    function adjustRep(i, amt) {
+        tasks[i].currReps = Math.max(0, tasks[i].currReps + amt);
+        saveToLocal();
+    }
+
+    function render() {
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        let totalPct = 0;
+
+        tasks.forEach((t, i) => {
+            const pct = Math.min((t.currDay / t.goalDays) * 100, 100);
+            totalPct += pct;
+            list.innerHTML += `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="task-name">${t.name}</h2>
+                            <div class="goal-display">Day ${t.currDay} of ${t.goalDays} • Goal: ${t.dailyGoal} daily</div>
+                        </div>
+                        <button onclick="openModal(${i})" style="background:none; border:none; color:#555; font-size:1.2rem;">⋮</button>
+                    </div>
+                    <div class="rep-container">
+                        <button class="circle-btn" onclick="adjustRep(${i}, -1)">−</button>
+                        <div class="rep-counter">${t.currReps}</div>
+                        <button class="circle-btn" onclick="adjustRep(${i}, 1)">+</button>
+                        <span style="color:#555; font-size:0.8rem;">TODAY'S REPS</span>
+                    </div>
+                    <div class="pct-label">${pct.toFixed(1)}%</div>
+                    <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                </div>`;
+        });
+
+        const overall = tasks.length ? (totalPct / tasks.length).toFixed(1) : 0;
+        document.getElementById('ov-text').innerText = overall + '%';
+        document.getElementById('ov-bar').style.width = overall + '%';
+    }
+
     render();
 </script>
 </body>
