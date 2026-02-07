@@ -22,25 +22,28 @@
         .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
         #list { display: flex; flex-direction: column; gap: 12px; }
-        .card { background: var(--card); border-radius: 14px; border: 1px solid #222; overflow: hidden; }
+        
+        /* Fixed Card: Removed overflow:hidden so menu can pop out */
+        .card { background: var(--card); border-radius: 14px; border: 1px solid #222; position: relative; z-index: 1; }
         .card-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; position: relative; }
         .task-name { font-weight: bold; font-size: 1rem; margin-bottom: 6px; color: #eee; }
-        .pct-val { color: #555; font-size: 0.85rem; font-weight: bold; margin-left: 10px;}
+        .pct-val { color: #555; font-size: 0.85rem; font-weight: bold; margin-left: 10px; }
         
-        /* 3-Dot Menu Styling */
-        .menu-container { position: relative; display: flex; align-items: center; }
-        .menu-dots { background: none; border: none; color: #555; font-size: 1.4rem; padding: 10px; cursor: pointer; line-height: 1; }
+        /* 3-Dot Menu */
+        .menu-container { position: relative; z-index: 100; }
+        .menu-dots { background: none; border: none; color: #444; font-size: 1.5rem; padding: 5px 10px; cursor: pointer; }
         .menu-dropdown { 
-            display: none; position: absolute; right: 0; top: 40px; 
+            display: none; position: absolute; right: 0; top: 35px; 
             background: #1a1a1a; border: 1px solid #333; border-radius: 10px; 
-            z-index: 1100; min-width: 120px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            min-width: 120px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); z-index: 5000;
         }
         .menu-dropdown.show { display: block; }
-        .menu-item { padding: 12px 16px; font-size: 0.9rem; color: #eee; text-align: left; }
-        .menu-item:active { background: #222; }
+        .menu-item { padding: 12px 16px; font-size: 0.9rem; color: #eee; border-bottom: 1px solid #222; }
+        .menu-item:last-child { border-bottom: none; }
         .menu-item.delete { color: var(--error); }
 
-        .expansion { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #080808; }
+        /* Expansion: Keep overflow:hidden here only */
+        .expansion { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #080808; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; }
         .card.open .expansion { max-height: 2000px; padding-bottom: 20px; }
         
         .day-container { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
@@ -51,10 +54,10 @@
         .dot { width: 24px; height: 24px; border-radius: 6px; background: #1a1a1a; border: 1px solid #333; }
         .dot.active { background: var(--accent); border-color: var(--accent); }
 
-        .add-btn { position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; border-radius: 28px; background: var(--accent); border: none; font-size: 28px; z-index: 100; font-weight: bold;}
+        .add-btn { position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; border-radius: 28px; background: var(--accent); border: none; font-size: 28px; z-index: 100; font-weight: bold; cursor: pointer; }
         .logout-btn { background: none; border: 1px solid #333; color: #666; padding: 8px 12px; border-radius: 8px; font-size: 0.7rem; cursor: pointer; }
         
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 4000; padding: 20px; }
         .modal-content { background: #1a1a1a; padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; }
         input { background: #000; border: 1px solid #333; color: #fff; padding: 14px; width: 100%; margin: 10px 0; border-radius: 10px; box-sizing: border-box; }
         button.primary { background: var(--accent); border: none; padding: 16px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; color: #000; }
@@ -89,11 +92,11 @@
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle" style="color:var(--accent); margin-top:0;">New Mission</h3>
+        <h3 id="modal-title" style="color:var(--accent); margin-top:0;">New Mission</h3>
         <input type="text" id="taskName" placeholder="Mission Name">
         <input type="number" id="goalDays" placeholder="Goal Days">
         <input type="number" id="goalReps" placeholder="Reps Per Day">
-        <button id="modalSubmit" class="primary" onclick="saveTask()">START TRACKING</button>
+        <button id="modal-btn" class="primary" onclick="saveTask()">START TRACKING</button>
         <button onclick="closeModal()" style="background:none; border:none; color:#666; width:100%; padding:15px; cursor:pointer;">Cancel</button>
     </div>
 </div>
@@ -118,9 +121,8 @@
     const db = getFirestore(app);
     let currentUser = null;
     let tasks = [];
-    let editIndex = null;
+    let editIdx = null;
 
-    // --- Auth ---
     window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
@@ -146,7 +148,6 @@
                 render();
             });
         } else {
-            currentUser = null;
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('list').innerHTML = '';
         }
@@ -157,22 +158,21 @@
         await setDoc(doc(db, "users", currentUser.uid), { tasks });
     }
 
-    // --- Modal Logic ---
     window.openModal = (idx = null) => {
-        editIndex = idx;
+        editIdx = idx;
         const modal = document.getElementById('modal');
-        const title = document.getElementById('modalTitle');
-        const submitBtn = document.getElementById('modalSubmit');
-
-        if (idx !== null) {
+        const title = document.getElementById('modal-title');
+        const btn = document.getElementById('modal-btn');
+        
+        if(idx !== null) {
             title.innerText = "Edit Mission";
-            submitBtn.innerText = "UPDATE MISSION";
+            btn.innerText = "SAVE CHANGES";
             document.getElementById('taskName').value = tasks[idx].name;
             document.getElementById('goalDays').value = tasks[idx].days;
             document.getElementById('goalReps').value = tasks[idx].repsPerDay;
         } else {
             title.innerText = "New Mission";
-            submitBtn.innerText = "START TRACKING";
+            btn.innerText = "START TRACKING";
             document.getElementById('taskName').value = '';
             document.getElementById('goalDays').value = '';
             document.getElementById('goalReps').value = '';
@@ -180,10 +180,7 @@
         modal.style.display = 'flex';
     };
 
-    window.closeModal = () => {
-        document.getElementById('modal').style.display = 'none';
-        editIndex = null;
-    };
+    window.closeModal = () => document.getElementById('modal').style.display = 'none';
 
     window.saveTask = async () => {
         const name = document.getElementById('taskName').value;
@@ -191,8 +188,8 @@
         const reps = parseInt(document.getElementById('goalReps').value);
         
         if (name && days && reps) {
-            if (editIndex !== null) {
-                tasks[editIndex] = { ...tasks[editIndex], name, days, repsPerDay: reps };
+            if(editIdx !== null) {
+                tasks[editIdx] = { ...tasks[editIdx], name, days, repsPerDay: reps };
             } else {
                 tasks.push({ name, days, repsPerDay: reps, completed: [], open: false });
             }
@@ -201,19 +198,19 @@
         }
     };
 
-    // --- Task Actions ---
     window.toggleMenu = (e, i) => {
         e.stopPropagation();
-        const allMenus = document.querySelectorAll('.menu-dropdown');
-        allMenus.forEach((m, idx) => {
-            if (idx !== i) m.classList.remove('show');
-        });
-        document.getElementById(`menu-${i}`).classList.toggle('show');
+        const menu = document.getElementById(`menu-${i}`);
+        const isShown = menu.classList.contains('show');
+        document.querySelectorAll('.menu-dropdown').forEach(m => m.classList.remove('show'));
+        if(!isShown) menu.classList.add('show');
     };
+
+    window.onclick = () => document.querySelectorAll('.menu-dropdown').forEach(m => m.classList.remove('show'));
 
     window.toggleCard = (i) => {
         tasks[i].open = !tasks[i].open;
-        render();
+        render(); 
     };
 
     window.toggleDot = async (e, taskIdx, dotIdx) => {
@@ -227,16 +224,11 @@
 
     window.deleteTask = async (e, i) => {
         e.stopPropagation();
-        if(confirm("Delete this mission permanently?")) {
+        if(confirm("Delete this mission?")) {
             tasks.splice(i, 1);
             await syncData();
         }
     };
-
-    // Close menus on outside click
-    window.addEventListener('click', () => {
-        document.querySelectorAll('.menu-dropdown').forEach(m => m.classList.remove('show'));
-    });
 
     function render() {
         const list = document.getElementById('list');
@@ -264,7 +256,7 @@
             list.innerHTML += `
                 <div class="card ${t.open ? 'open' : ''}">
                     <div class="card-header" onclick="toggleCard(${tIdx})">
-                        <div style="flex-grow:1; margin-right:10px;">
+                        <div style="flex-grow:1; margin-right:15px;">
                             <div class="task-name">${t.name}</div>
                             <div class="bar-bg"><div class="bar-fill" style="width:${taskPct}%"></div></div>
                         </div>
