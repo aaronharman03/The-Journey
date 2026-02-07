@@ -6,7 +6,6 @@
     <title>Social Progress PWA</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
     
     <style>
         :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --error: #ff4444; }
@@ -23,10 +22,23 @@
         
         #list { display: flex; flex-direction: column; gap: 12px; }
         .card { background: var(--card); border-radius: 14px; border: 1px solid #222; overflow: hidden; }
-        .card-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .card-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; position: relative; }
         .task-name { font-weight: bold; font-size: 1rem; margin-bottom: 6px; color: #eee; }
-        .pct-val { color: #555; font-size: 0.85rem; font-weight: bold; }
+        .pct-val { color: #555; font-size: 0.85rem; font-weight: bold; margin-left: 10px;}
         
+        /* 3-Dot Menu Styling */
+        .menu-container { position: relative; display: flex; align-items: center; }
+        .menu-dots { background: none; border: none; color: #555; font-size: 1.4rem; padding: 10px; cursor: pointer; line-height: 1; }
+        .menu-dropdown { 
+            display: none; position: absolute; right: 0; top: 40px; 
+            background: #1a1a1a; border: 1px solid #333; border-radius: 10px; 
+            z-index: 1100; min-width: 120px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .menu-dropdown.show { display: block; }
+        .menu-item { padding: 12px 16px; font-size: 0.9rem; color: #eee; text-align: left; }
+        .menu-item:active { background: #222; }
+        .menu-item.delete { color: var(--error); }
+
         .expansion { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #080808; }
         .card.open .expansion { max-height: 2000px; padding-bottom: 20px; }
         
@@ -76,11 +88,11 @@
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3 style="color:var(--accent); margin-top:0;">New Mission</h3>
+        <h3 id="modalTitle" style="color:var(--accent); margin-top:0;">New Mission</h3>
         <input type="text" id="taskName" placeholder="Mission Name">
         <input type="number" id="goalDays" placeholder="Goal Days">
         <input type="number" id="goalReps" placeholder="Reps Per Day">
-        <button class="primary" onclick="addTask()">START TRACKING</button>
+        <button id="modalSubmit" class="primary" onclick="saveTask()">START TRACKING</button>
         <button onclick="closeModal()" style="background:none; border:none; color:#666; width:100%; padding:15px; cursor:pointer;">Cancel</button>
     </div>
 </div>
@@ -90,15 +102,14 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // PASTE YOUR CONFIG HERE
     const firebaseConfig = {
-         apiKey: "AIzaSyBn4MCxlcJFxNJV91JyisbrJtUMkSHRjXI",
-  authDomain: "socialmax-929eb.firebaseapp.com",
-  projectId: "socialmax-929eb",
-  storageBucket: "socialmax-929eb.firebasestorage.app",
-  messagingSenderId: "60765069620",
-  appId: "1:60765069620:web:df9b8df0ee13ce5d018561",
-  measurementId: "G-CF3XL1XZWF"
+        apiKey: "AIzaSyBn4MCxlcJFxNJV91JyisbrJtUMkSHRjXI",
+        authDomain: "socialmax-929eb.firebaseapp.com",
+        projectId: "socialmax-929eb",
+        storageBucket: "socialmax-929eb.firebasestorage.app",
+        messagingSenderId: "60765069620",
+        appId: "1:60765069620:web:df9b8df0ee13ce5d018561",
+        measurementId: "G-CF3XL1XZWF"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -106,8 +117,9 @@
     const db = getFirestore(app);
     let currentUser = null;
     let tasks = [];
+    let editIndex = null;
 
-    // --- Auth Logic ---
+    // --- Auth ---
     window.handleAuth = async () => {
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
@@ -128,41 +140,79 @@
         if (user) {
             currentUser = user;
             document.getElementById('auth-screen').style.display = 'none';
-            // Listen to data in real-time
             onSnapshot(doc(db, "users", user.uid), (doc) => {
                 tasks = doc.data()?.tasks || [];
                 render();
             });
         } else {
+            currentUser = null;
             document.getElementById('auth-screen').style.display = 'flex';
             document.getElementById('list').innerHTML = '';
         }
     });
 
-    // --- Task Logic ---
     async function syncData() {
         if (!currentUser) return;
         await setDoc(doc(db, "users", currentUser.uid), { tasks });
     }
 
-    window.openModal = () => document.getElementById('modal').style.display = 'flex';
-    window.closeModal = () => document.getElementById('modal').style.display = 'none';
+    // --- Modal Logic ---
+    window.openModal = (idx = null) => {
+        editIndex = idx;
+        const modal = document.getElementById('modal');
+        const title = document.getElementById('modalTitle');
+        const submitBtn = document.getElementById('modalSubmit');
 
-    window.addTask = async () => {
+        if (idx !== null) {
+            title.innerText = "Edit Mission";
+            submitBtn.innerText = "UPDATE MISSION";
+            document.getElementById('taskName').value = tasks[idx].name;
+            document.getElementById('goalDays').value = tasks[idx].days;
+            document.getElementById('goalReps').value = tasks[idx].repsPerDay;
+        } else {
+            title.innerText = "New Mission";
+            submitBtn.innerText = "START TRACKING";
+            document.getElementById('taskName').value = '';
+            document.getElementById('goalDays').value = '';
+            document.getElementById('goalReps').value = '';
+        }
+        modal.style.display = 'flex';
+    };
+
+    window.closeModal = () => {
+        document.getElementById('modal').style.display = 'none';
+        editIndex = null;
+    };
+
+    window.saveTask = async () => {
         const name = document.getElementById('taskName').value;
         const days = parseInt(document.getElementById('goalDays').value);
         const reps = parseInt(document.getElementById('goalReps').value);
+        
         if (name && days && reps) {
-            tasks.push({ name, days, repsPerDay: reps, completed: [], open: false });
+            if (editIndex !== null) {
+                tasks[editIndex] = { ...tasks[editIndex], name, days, repsPerDay: reps };
+            } else {
+                tasks.push({ name, days, repsPerDay: reps, completed: [], open: false });
+            }
             await syncData();
             closeModal();
-            document.getElementById('taskName').value = '';
         }
+    };
+
+    // --- Task Actions ---
+    window.toggleMenu = (e, i) => {
+        e.stopPropagation();
+        const allMenus = document.querySelectorAll('.menu-dropdown');
+        allMenus.forEach((m, idx) => {
+            if (idx !== i) m.classList.remove('show');
+        });
+        document.getElementById(`menu-${i}`).classList.toggle('show');
     };
 
     window.toggleCard = (i) => {
         tasks[i].open = !tasks[i].open;
-        render(); // Local only for UX speed
+        render();
     };
 
     window.toggleDot = async (e, taskIdx, dotIdx) => {
@@ -174,12 +224,18 @@
         await syncData();
     };
 
-    window.deleteTask = async (i) => {
-        if(confirm("Delete this mission?")) {
+    window.deleteTask = async (e, i) => {
+        e.stopPropagation();
+        if(confirm("Delete this mission permanently?")) {
             tasks.splice(i, 1);
             await syncData();
         }
     };
+
+    // Close menus on outside click
+    window.addEventListener('click', () => {
+        document.querySelectorAll('.menu-dropdown').forEach(m => m.classList.remove('show'));
+    });
 
     function render() {
         const list = document.getElementById('list');
@@ -207,17 +263,21 @@
             list.innerHTML += `
                 <div class="card ${t.open ? 'open' : ''}">
                     <div class="card-header" onclick="toggleCard(${tIdx})">
-                        <div style="flex-grow:1; margin-right:15px;">
+                        <div style="flex-grow:1; margin-right:10px;">
                             <div class="task-name">${t.name}</div>
                             <div class="bar-bg"><div class="bar-fill" style="width:${taskPct}%"></div></div>
                         </div>
                         <div class="pct-val">${taskPct.toFixed(1)}%</div>
+                        <div class="menu-container">
+                            <button class="menu-dots" onclick="toggleMenu(event, ${tIdx})">⋮</button>
+                            <div id="menu-${tIdx}" class="menu-dropdown">
+                                <div class="menu-item" onclick="openModal(${tIdx})">Edit</div>
+                                <div class="menu-item delete" onclick="deleteTask(event, ${tIdx})">Delete</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="expansion">
                         <div class="day-container">${gridHtml}</div>
-                        <div style="text-align:center; padding-top:25px;">
-                            <button style="background:none; border:none; color:#422; font-size:0.65rem; font-weight:bold;" onclick="deleteTask(${tIdx})">REMOVE TASK</button>
-                        </div>
                     </div>
                 </div>`;
         });
@@ -225,12 +285,6 @@
         const overall = totalDots > 0 ? (totalCompleted / totalDots * 100).toFixed(1) : 0;
         document.getElementById('ov-text').innerText = overall + '%';
         document.getElementById('ov-bar').style.width = overall + '%';
-    }
-</script>
-
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js');
     }
 </script>
 </body>
