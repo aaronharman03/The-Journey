@@ -3,72 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Social Progress PWA</title>
+    <title>Social Mastery</title>
     <style>
-        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-top: 100px; }
+        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --gold: #ffd700; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-top: 110px; }
         
-        /* Fixed Header */
         #header { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); padding: 15px 20px; z-index: 1000; border-bottom: 1px solid #222; backdrop-filter: blur(10px); }
-        .bar-bg { background: #222; border-radius: 10px; height: 6px; width: 100%; margin-top: 8px; overflow: hidden; }
-        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .bar-bg { background: #222; border-radius: 10px; height: 8px; width: 100%; margin-top: 8px; overflow: hidden; }
+        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.5s cubic-bezier(0.1, 0.9, 0.2, 1); }
         
-        /* Task List */
-        #list { display: flex; flex-direction: column; gap: 12px; }
-        .card { background: var(--card); border-radius: 14px; border: 1px solid #222; overflow: hidden; }
-        .card-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .task-info { flex-grow: 1; margin-right: 15px; }
-        .task-name { font-weight: bold; font-size: 1rem; margin-bottom: 6px; color: #eee; }
-        .pct-val { color: #555; font-size: 0.85rem; font-variant-numeric: tabular-nums; font-weight: bold; }
-        
-        /* Expandable Grid */
-        .expansion { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #080808; }
-        .card.open .expansion { max-height: 2000px; padding-bottom: 20px; }
-        
-        /* Spacing between Header and Boxes */
-        .day-container { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        
-        .day-row { display: flex; align-items: center; gap: 12px; }
-        .day-label { font-size: 0.6rem; color: #444; width: 32px; font-weight: 800; text-transform: uppercase; }
-        .reps { display: flex; gap: 8px; flex-wrap: wrap; }
-        
-        .dot { width: 24px; height: 24px; border-radius: 6px; background: #1a1a1a; border: 1px solid #333; transition: 0.1s; }
-        .dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(0,255,136,0.2); }
+        .streak-fire { color: #ff8800; font-weight: 900; font-size: 0.9rem; margin-right: 10px; }
 
-        .add-btn { position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; border-radius: 28px; background: var(--accent); color: #000; border: none; font-size: 28px; z-index: 100; box-shadow: 0 4px 20px rgba(0,255,136,0.3); }
+        #list { display: flex; flex-direction: column; gap: 15px; }
+        
+        .card { background: var(--card); border-radius: 16px; border: 1px solid #222; transition: 0.3s; position: relative; opacity: 0.4; }
+        
+        /* The Glow for the current task in the sequence */
+        .active-task { opacity: 1; border-color: var(--accent); box-shadow: 0 0 15px rgba(0,255,136,0.2); transform: scale(1.01); }
+        
+        /* Gold Mastery Border */
+        .completed-task { opacity: 0.8; border: 2px solid var(--gold); box-shadow: 0 0 10px rgba(255,215,0,0.15); }
+
+        .card-header { padding: 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .task-name { font-weight: 800; font-size: 1.1rem; }
+        
+        .expansion { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .card.open .expansion { max-height: 2000px; padding-bottom: 25px; }
+        
+        .day-container { padding: 0 18px; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .day-row { display: flex; align-items: center; gap: 12px; }
+        .day-label { font-size: 0.6rem; color: #555; width: 35px; font-weight: 900; }
+        
+        .dot { width: 26px; height: 26px; border-radius: 7px; background: #1a1a1a; border: 1px solid #333; transition: 0.1s; cursor: pointer; }
+        .dot.active { background: var(--accent); border-color: var(--accent); }
+        .completed-task .dot.active { background: var(--gold); border-color: var(--gold); }
+
+        .add-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: #fff; color: #000; border: none; font-size: 30px; font-weight: bold; z-index: 100; }
         
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; border: 1px solid #333; }
-        input { background: #000; border: 1px solid #333; color: #fff; padding: 14px; width: 100%; margin: 10px 0; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
+        .modal-content { background: #111; padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; border: 1px solid #333; }
+        input { background: #000; border: 1px solid #333; color: #fff; padding: 14px; width: 100%; margin: 10px 0; border-radius: 10px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div id="header">
     <div style="display:flex; justify-content:space-between; align-items: baseline;">
-        <span style="font-size:0.65rem; color:#666; font-weight: 900; letter-spacing: 1.5px;">TOTAL MASTERY</span>
+        <div>
+            <span id="streak-count" class="streak-fire">🔥 0 DAYS</span>
+            <span style="font-size:0.65rem; color:#666; font-weight: 900; letter-spacing: 1px;">TOTAL MASTERY</span>
+        </div>
         <span id="ov-text" style="color:var(--accent); font-weight:bold; font-size: 1.4rem;">0.0%</span>
     </div>
     <div class="bar-bg"><div id="ov-bar" class="bar-fill"></div></div>
 </div>
 
 <div id="list"></div>
-
 <button class="add-btn" onclick="openModal()">+</button>
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3 style="color:var(--accent); margin-top:0;">New Mission</h3>
+        <h3 style="color:var(--accent); margin-top:0;">New Task</h3>
         <input type="text" id="taskName" placeholder="Mission Name">
         <input type="number" id="goalDays" placeholder="Goal Days">
         <input type="number" id="goalReps" placeholder="Reps Per Day">
-        <button onclick="addTask()" style="background:var(--accent); border:none; padding:16px; width:100%; border-radius:12px; font-weight:bold; margin-top:10px; cursor:pointer;">START TRACKING</button>
-        <button onclick="closeModal()" style="background:none; border:none; color:#666; width:100%; padding:15px; cursor:pointer;">Cancel</button>
+        <button onclick="addTask()" style="background:var(--accent); border:none; padding:16px; width:100%; border-radius:12px; font-weight:bold; cursor:pointer;">ADD TO STACK</button>
+        <button onclick="closeModal()" style="background:none; border:none; color:#555; width:100%; padding:15px;">Cancel</button>
     </div>
 </div>
 
 <script>
-    let tasks = JSON.parse(localStorage.getItem('socialPWA_v2')) || [];
+    let tasks = JSON.parse(localStorage.getItem('socialMastery')) || [];
+    let history = JSON.parse(localStorage.getItem('socialHistory')) || {}; // Stores last action dates
 
     function openModal() { document.getElementById('modal').style.display = 'flex'; }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
@@ -78,79 +84,88 @@
         const days = parseInt(document.getElementById('goalDays').value);
         const reps = parseInt(document.getElementById('goalReps').value);
         if (name && days && reps) {
-            tasks.push({ name, days, repsPerDay: reps, completed: [], open: false });
+            tasks.push({ name, days, repsPerDay: reps, completed: [], open: (tasks.length === 0) });
             saveAndRender();
             closeModal();
             document.getElementById('taskName').value = '';
         }
     }
 
-    function toggleCard(i) {
-        tasks[i].open = !tasks[i].open;
+    function toggleDot(e, tIdx, dIdx) {
+        e.stopPropagation();
+        const t = tasks[tIdx];
+        const i = t.completed.indexOf(dIdx);
+        if (i > -1) t.completed.splice(i, 1);
+        else {
+            t.completed.push(dIdx);
+            updateStreak();
+        }
         saveAndRender();
     }
 
-    function toggleDot(e, taskIdx, dotIdx) {
-        e.stopPropagation();
-        const t = tasks[taskIdx];
-        const index = t.completed.indexOf(dotIdx);
-        if (index > -1) t.completed.splice(index, 1);
-        else t.completed.push(dotIdx);
-        saveAndRender();
+    function updateStreak() {
+        const today = new Date().toDateString();
+        if (!history.lastDate) {
+            history.streak = 1;
+        } else {
+            const last = new Date(history.lastDate);
+            const diff = (new Date(today) - last) / (1000 * 60 * 60 * 24);
+            if (diff === 1) history.streak++;
+            else if (diff > 1) history.streak = 1;
+        }
+        history.lastDate = today;
+        localStorage.setItem('socialHistory', JSON.stringify(history));
     }
 
     function saveAndRender() {
-        localStorage.setItem('socialPWA_v2', JSON.stringify(tasks));
+        localStorage.setItem('socialMastery', JSON.stringify(tasks));
         const list = document.getElementById('list');
         list.innerHTML = '';
-        let totalDots = 0, totalCompleted = 0;
+        let totalDots = 0, totalDone = 0;
+        let activeFound = false;
 
         tasks.forEach((t, tIdx) => {
-            const taskTotal = t.days * t.repsPerDay;
-            const taskDone = t.completed.length;
-            const taskPct = (taskDone / taskTotal) * 100;
-            totalDots += taskTotal;
-            totalCompleted += taskDone;
+            const max = t.days * t.repsPerDay;
+            const done = t.completed.length;
+            const pct = (done / max) * 100;
+            totalDots += max; totalDone += done;
 
-            let gridHtml = '';
+            let state = '';
+            if (pct >= 100) state = 'completed-task';
+            else if (!activeFound) { state = 'active-task'; activeFound = true; }
+
+            let grid = '';
             for (let d = 0; d < t.days; d++) {
-                gridHtml += `<div class="day-row"><div class="day-label">D${d+1}</div><div class="reps">`;
+                grid += `<div class="day-row"><div class="day-label">D${d+1}</div><div class="reps">`;
                 for (let r = 0; r < t.repsPerDay; r++) {
-                    const dotIdx = (d * t.repsPerDay) + r;
-                    const active = t.completed.includes(dotIdx) ? 'active' : '';
-                    gridHtml += `<div class="dot ${active}" onclick="toggleDot(event, ${tIdx}, ${dotIdx})"></div>`;
+                    const idx = (d * t.repsPerDay) + r;
+                    const active = t.completed.includes(idx) ? 'active' : '';
+                    grid += `<div class="dot ${active}" onclick="toggleDot(event, ${tIdx}, ${idx})"></div>`;
                 }
-                gridHtml += `</div></div>`;
+                grid += `</div></div>`;
             }
 
             list.innerHTML += `
-                <div class="card ${t.open ? 'open' : ''}">
-                    <div class="card-header" onclick="toggleCard(${tIdx})">
-                        <div class="task-info">
-                            <div class="task-name">${t.name}</div>
-                            <div class="bar-bg" style="width: 100%"><div class="bar-fill" style="width:${taskPct}%"></div></div>
+                <div class="card ${state} ${t.open ? 'open' : ''}">
+                    <div class="card-header" onclick="tasks[${tIdx}].open = !tasks[${tIdx}].open; saveAndRender()">
+                        <div style="flex-grow:1">
+                            <div class="task-name">${pct >= 100 ? '⭐ ' : ''}${t.name}</div>
+                            <div class="bar-bg" style="width: 85%"><div class="bar-fill" style="width:${pct}%; background:${pct >= 100 ? 'var(--gold)' : 'var(--accent)'}"></div></div>
                         </div>
-                        <div class="pct-val">${taskPct.toFixed(1)}%</div>
+                        <div style="font-size:0.8rem; font-weight:bold; color:${pct >= 100 ? 'var(--gold)' : '#444'}">${pct.toFixed(1)}%</div>
                     </div>
                     <div class="expansion">
-                        <div class="day-container">${gridHtml}</div>
-                        <div style="text-align:center; padding-top:25px;">
-                            <button style="background:none; border:none; color:#422; font-size:0.65rem; font-weight:bold; letter-spacing:1px;" onclick="deleteTask(${tIdx})">REMOVE TASK</button>
+                        <div class="day-container">${grid}</div>
+                        <div style="text-align:center; padding-top:20px;">
+                            <span style="color:#300; font-size:0.6rem; font-weight:bold;" onclick="tasks.splice(${tIdx},1); saveAndRender()">DELETE MISSION</span>
                         </div>
                     </div>
                 </div>`;
         });
 
-        const overall = totalDots > 0 ? (totalCompleted / totalDots * 100).toFixed(1) : 0;
-        document.getElementById('ov-text').innerText = overall + '%';
-        document.getElementById('ov-bar').style.width = overall + '%';
-    }
-
-    function deleteTask(i) {
-        if(confirm("Delete this mission?")) {
-            tasks.splice(i, 1);
-            saveAndRender();
-        }
+        document.getElementById('ov-text').innerText = (totalDots > 0 ? (totalDone / totalDots * 100).toFixed(1) : 0) + '%';
+        document.getElementById('ov-bar').style.width = (totalDone / totalDots * 100) + '%';
+        document.getElementById('streak-count').innerText = `🔥 ${history.streak || 0} DAYS`;
     }
 
     saveAndRender();
