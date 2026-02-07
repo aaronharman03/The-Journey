@@ -3,233 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Total Human</title>
+    <title>Total Human PWA</title>
     <style>
-        :root { --bg: #000; --card: #121212; --accent: #00ff88; --text: #fff; --panel: #1a1a1a; --warrior: #00ff88; --greek: #00d2ff; --super: #ffcc00; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #000; --card: #121212; --accent: #00ff88; --text: #fff; --panel: #1a1a1a; --w-color: #00ff88; --g-color: #00d2ff; --s-color: #ffcc00; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; -webkit-tap-highlight-color: transparent; }
         
-        /* Layout */
-        .page { display: none; padding: 20px; padding-bottom: 100px; }
+        /* Navigation */
+        .page { display: none; padding: 20px; }
         .active { display: block; }
-        .header { text-align: center; padding: 30px 0; border-bottom: 1px solid #222; margin-bottom: 20px; }
         
-        /* Progress Bars */
-        .bar-bg { background: #222; border-radius: 10px; height: 10px; width: 100%; margin-top: 8px; overflow: hidden; }
-        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
+        /* Top Progress Section */
+        #header { position: sticky; top: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); padding: 20px; z-index: 1000; border-bottom: 1px solid #222; }
+        .total-val { font-size: 2.5rem; font-weight: 900; color: var(--accent); text-align: center; }
         
-        /* Home Grid */
-        .pillar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .pillar-card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #222; text-align: center; }
+        /* Multi-Goal Bar */
+        .roadmap { position: relative; background: #222; border-radius: 4px; height: 12px; width: 100%; margin: 15px 0; overflow: hidden; }
+        .roadmap-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
+        .marker { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; opacity: 0.6; z-index: 5; }
 
-        /* Titan Tier Cards */
-        .tier-card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #222; margin-bottom: 15px; cursor: pointer; }
-        
-        /* Exercise Cards */
+        /* Pillar Cards (Home) */
+        .pillar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .pillar-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; cursor: pointer; }
+
+        /* Lift Cards */
         .lift-card { background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #222; }
-        .rep-in { background: #222; border: 1px solid #333; color: #fff; width: 50px; height: 50px; text-align: center; border-radius: 8px; font-size: 1.2rem; font-weight: bold; }
+        .lift-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .set-container { display: flex; gap: 8px; margin: 15px 0; overflow-x: auto; }
+        .rep-in { background: #222; border: 1px solid #333; color: #fff; width: 50px; height: 50px; text-align: center; border-radius: 10px; font-size: 1.2rem; font-weight: bold; }
         
-        /* Modal */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--panel); width: 100%; max-width: 400px; padding: 25px; border-radius: 20px; }
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        input { background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
-        .btn { border: none; border-radius: 10px; font-weight: bold; padding: 14px; width: 100%; cursor: pointer; margin-top: 10px; }
+        /* Modal Settings */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--panel); width: 100%; max-width: 400px; padding: 25px; border-radius: 20px; max-height: 90vh; overflow-y: auto; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        label { font-size: 0.7rem; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 1rem; }
+        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; padding: 14px; width: 100%; margin-top: 15px; }
         .btn-primary { background: var(--accent); color: #000; }
-        .btn-back { background: none; border: 1px solid #333; color: #888; margin-bottom: 20px; width: auto; padding: 8px 15px; }
+        .btn-back { background: transparent; color: #888; border: 1px solid #333; width: auto; padding: 8px 15px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
+<div id="header">
+    <div style="text-align: center; font-size: 0.7rem; color: #666; letter-spacing: 2px;">TOTAL HUMAN PROGRESS</div>
+    <div id="ov-text" class="total-val">0%</div>
+    <div class="roadmap" id="main-roadmap">
+        <div id="ov-bar" class="roadmap-fill"></div>
+    </div>
+</div>
+
 <div id="home-page" class="page active">
-    <div class="header">
-        <div style="font-size: 0.7rem; color: #666; letter-spacing: 2px;">TOTAL HUMAN</div>
-        <div id="total-val" style="font-size: 3rem; font-weight: 900; color: var(--accent);">0%</div>
-        <div class="bar-bg"><div id="total-bar-fill" class="bar-fill"></div></div>
-    </div>
     <div class="pillar-grid">
-        <div class="pillar-card" onclick="showPage('titan-hub')">
-            <div style="color: #666; font-size: 0.6rem;">PHYSICAL</div>
-            <strong>TITAN</strong>
-            <div id="titan-home-val" style="color: var(--accent); font-size: 0.9rem;">0%</div>
+        <div class="pillar-card" onclick="showPage('titan-page')">
+            <div style="color: #666; font-size: 0.6rem; letter-spacing: 1px;">THE TITAN</div>
+            <strong style="display: block; margin: 10px 0; font-size: 1.2rem;">Body</strong>
+            <div id="titan-pct" style="color: var(--accent); font-weight: bold;">0%</div>
         </div>
         <div class="pillar-card">
-            <div style="color: #666; font-size: 0.6rem;">BUSINESS</div>
-            <strong>ARCHITECT</strong>
-        </div>
-        <div class="pillar-card">
-            <div style="color: #666; font-size: 0.6rem;">SOCIAL</div>
-            <strong>ENVOY</strong>
-        </div>
-        <div class="pillar-card">
-            <div style="color: #666; font-size: 0.6rem;">SPIRIT</div>
-            <strong>MONK</strong>
+            <div style="color: #666; font-size: 0.6rem; letter-spacing: 1px;">THE ARCHITECT</div>
+            <strong style="display: block; margin: 10px 0; font-size: 1.2rem;">Empire</strong>
+            <div style="color: #444;">LOCKED</div>
         </div>
     </div>
 </div>
 
-<div id="titan-hub" class="page">
+<div id="titan-page" class="page">
     <button class="btn btn-back" onclick="showPage('home-page')">← HOME</button>
-    <h2 style="margin-bottom: 25px;">TITAN PHASES</h2>
-    
-    <div class="tier-card" onclick="openTier('warrior')">
-        <div style="display: flex; justify-content: space-between;"><strong>WARRIOR</strong> <span id="w-val">0%</span></div>
-        <div class="bar-bg"><div id="w-bar" class="bar-fill" style="background: var(--warrior)"></div></div>
-    </div>
-
-    <div class="tier-card" onclick="openTier('greek')">
-        <div style="display: flex; justify-content: space-between;"><strong>GREEK GOD</strong> <span id="g-val">0%</span></div>
-        <div class="bar-bg"><div id="g-bar" class="bar-fill" style="background: var(--greek)"></div></div>
-    </div>
-
-    <div class="tier-card" onclick="openTier('super')">
-        <div style="display: flex; justify-content: space-between;"><strong>SUPERHERO</strong> <span id="s-val">0%</span></div>
-        <div class="bar-bg"><div id="s-bar" class="bar-fill" style="background: var(--super)"></div></div>
-    </div>
-</div>
-
-<div id="tier-page" class="page">
-    <button class="btn btn-back" onclick="showPage('titan-hub')">← BACK TO PHASES</button>
-    <h2 id="tier-title" style="margin-bottom: 5px; text-transform: uppercase;"></h2>
-    <div id="tier-list"></div>
+    <div id="lift-list"></div>
     <button class="btn btn-primary" onclick="addLift()" style="background: #111; color: var(--accent); border: 1px solid #333;">+ ADD EXERCISE</button>
 </div>
 
 <div id="editModal" class="modal">
     <div class="modal-content">
-        <h3 id="modalTitle" style="color: var(--accent);">Edit Exercise</h3>
-        <label>Name</label><input type="text" id="eName">
+        <h3 id="modalTitle" style="margin: 0 0 20px 0; color: var(--accent);">Lift Settings</h3>
+        <label>Exercise Name</label><input type="text" id="eName">
         <div class="modal-grid">
+            <div><label>Start Wt</label><input type="number" id="eStart"></div>
             <div><label>Current Wt</label><input type="number" id="eCurr"></div>
-            <div><label>Increment</label><input type="number" id="eInc"></div>
             <div><label>Warrior Goal</label><input type="number" id="eGoalW"></div>
             <div><label>Greek Goal</label><input type="number" id="eGoalG"></div>
             <div><label>Super Goal</label><input type="number" id="eGoalS"></div>
+            <div><label>Increment</label><input type="number" id="eInc"></div>
             <div><label>Min Reps</label><input type="number" id="eMin"></div>
             <div><label>Max Reps</label><input type="number" id="eMax"></div>
         </div>
-        <button class="btn btn-primary" onclick="saveEdit()">SAVE ALL TIERS</button>
-        <button class="btn" style="background: #333; color: #fff;" onclick="closeModal()">CANCEL</button>
+        <button class="btn btn-primary" onclick="saveEdit()">SAVE CHANGES</button>
+        <button class="btn" onclick="closeModal()" style="background: #222; color: #fff;">CANCEL</button>
+        <button onclick="deleteLift()" style="background:none; border:none; color:#f55; width:100%; margin-top:20px; font-size:0.8rem;">DELETE EXERCISE</button>
     </div>
 </div>
 
-<script type="module">
-    // Your Firebase initialization here...
-    // window.lifts = [{ name: "Bench Press", curr: 60, inc: 2.5, goalW: 80, goalG: 100, goalS: 140, minR: 8, maxR: 12, sets: [8,8,8] }];
-    
-    let activeTier = 'warrior'; // warrior, greek, super
+<script>
+    let lifts = JSON.parse(localStorage.getItem('total_human_lifts')) || [];
     let currentEditIdx = null;
-    window.lifts = [];
 
-    window.showPage = (id) => {
+    function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         render();
-    };
-
-    window.openTier = (tier) => {
-        activeTier = tier;
-        document.getElementById('tier-title').innerText = tier + " Phase";
-        showPage('tier-page');
-    };
-
-    function calculate(l, tier) {
-        const goal = (tier === 'warrior') ? l.goalW : (tier === 'greek' ? l.goalG : l.goalS);
-        if (!goal || goal <= 0) return 0;
-        
-        const ptsPerWeightLevel = (l.maxR - l.minR) * l.sets.length;
-        const totalSteps = (goal - 0) / l.inc; // Assuming 0 as start for simplicity
-        const maxPoints = (totalSteps * ptsPerWeightLevel) + ptsPerWeightLevel;
-        
-        const weightPoints = (l.curr / l.inc) * ptsPerWeightLevel;
-        const repPoints = l.sets.reduce((sum, r) => sum + Math.max(0, Math.min(r - l.minR, l.maxR - l.minR)), 0);
-        
-        return Math.min(100, ((weightPoints + repPoints) / maxPoints) * 100);
     }
 
-    window.render = () => {
-        const list = document.getElementById('tier-list');
+    function calculate(l) {
+        if (!l.goalS || l.goalS <= l.start) return 0;
+        
+        const ptsPerLevel = (l.maxR - l.minR) * l.sets.length;
+        const totalSteps = (l.goalS - l.start) / l.inc;
+        const maxPoints = (totalSteps * ptsPerLevel) + ptsPerLevel;
+        
+        const weightPoints = ((l.curr - l.start) / l.inc) * ptsPerLevel;
+        const repPoints = l.sets.reduce((sum, r) => sum + Math.max(0, Math.min(r - l.minR, l.maxR - l.minR)), 0);
+        
+        return Math.max(0, Math.min(100, ((weightPoints + repPoints) / maxPoints) * 100));
+    }
+
+    function getMarkers(l) {
+        const totalRange = l.goalS - l.start;
+        if (totalRange <= 0) return { w: 0, g: 0 };
+        return {
+            w: ((l.goalW - l.start) / totalRange) * 100,
+            g: ((l.goalG - l.start) / totalRange) * 100
+        };
+    }
+
+    function render() {
+        const list = document.getElementById('lift-list');
         list.innerHTML = '';
-        let wSum = 0, gSum = 0, sSum = 0;
+        let totalSum = 0;
+        let avgW = 0, avgG = 0;
 
-        window.lifts.forEach((l, i) => {
-            const wPct = calculate(l, 'warrior');
-            const gPct = calculate(l, 'greek');
-            const sPct = calculate(l, 'super');
-            
-            wSum += wPct; gSum += gPct; sSum += sPct;
+        lifts.forEach((l, i) => {
+            const pct = calculate(l);
+            const markers = getMarkers(l);
+            totalSum += pct;
+            avgW += markers.w;
+            avgG += markers.g;
 
-            const displayPct = (activeTier === 'warrior') ? wPct : (activeTier === 'greek' ? gPct : sPct);
-            const displayGoal = (activeTier === 'warrior') ? l.goalW : (activeTier === 'greek' ? l.goalG : l.goalS);
-
-            if (document.getElementById('tier-page').classList.contains('active')) {
-                list.innerHTML += `
-                    <div class="lift-card">
-                        <div style="display:flex; justify-content:space-between;">
-                            <strong>${l.name}</strong>
-                            <button onclick="openModal(${i})" style="background:none; border:none; color:#666;">⋮</button>
+            list.innerHTML += `
+                <div class="lift-card">
+                    <div class="lift-header">
+                        <div>
+                            <strong style="font-size: 1.1rem; color: var(--accent);">${l.name}</strong>
+                            <div style="font-size: 0.8rem; color: #666; margin-top: 4px;">${l.curr}kg / ${l.goalS}kg Max</div>
                         </div>
-                        <div style="font-size: 0.8rem; color: #888; margin: 5px 0;">${l.curr}kg / Goal: ${displayGoal}kg</div>
-                        <div class="bar-bg"><div class="bar-fill" style="width: ${displayPct}%"></div></div>
+                        <button onclick="openModal(${i})" style="background:none; border:none; color:#666; font-size: 1.5rem;">⋮</button>
                     </div>
-                `;
-            }
+                    <div class="set-container">
+                        ${l.sets.map((r, si) => `<input type="number" class="rep-in" value="${r}" onchange="updateReps(${i}, ${si}, this.value)">`).join('')}
+                    </div>
+                    <div class="roadmap">
+                        <div class="marker" style="left: ${markers.w}%"></div>
+                        <div class="marker" style="left: ${markers.g}%"></div>
+                        <div class="roadmap-fill" style="width: ${pct}%"></div>
+                    </div>
+                </div>`;
         });
 
-        const wAvg = window.lifts.length ? (wSum / window.lifts.length) : 0;
-        const gAvg = window.lifts.length ? (gSum / window.lifts.length) : 0;
-        const sAvg = window.lifts.length ? (sSum / window.lifts.length) : 0;
+        // Update Global Stats
+        const finalPct = lifts.length ? (totalSum / lifts.length) : 0;
+        document.getElementById('ov-text').innerText = finalPct.toFixed(1) + '%';
+        document.getElementById('ov-bar').style.width = finalPct + '%';
+        document.getElementById('titan-pct').innerText = finalPct.toFixed(1) + '%';
+        
+        // Update Main Header Markers
+        if (lifts.length) {
+            const header = document.getElementById('main-roadmap');
+            const wMark = avgW / lifts.length;
+            const gMark = avgG / lifts.length;
+            // Clear existing markers then re-add
+            header.querySelectorAll('.marker').forEach(m => m.remove());
+            header.insertAdjacentHTML('afterbegin', `<div class="marker" style="left: ${wMark}%"></div><div class="marker" style="left: ${gMark}%"></div>`);
+        }
 
-        // Update Hub Bars
-        document.getElementById('w-val').innerText = wAvg.toFixed(1) + '%';
-        document.getElementById('w-bar').style.width = wAvg + '%';
-        document.getElementById('g-val').innerText = gAvg.toFixed(1) + '%';
-        document.getElementById('g-bar').style.width = gAvg + '%';
-        document.getElementById('s-val').innerText = sAvg.toFixed(1) + '%';
-        document.getElementById('s-bar').style.width = sAvg + '%';
+        localStorage.setItem('total_human_lifts', JSON.stringify(lifts));
+    }
 
-        // Update Home Screen
-        const titanAvg = (wAvg + gAvg + sAvg) / 3;
-        document.getElementById('titan-home-val').innerText = titanAvg.toFixed(1) + '%';
-        document.getElementById('total-val').innerText = titanAvg.toFixed(1) + '%';
-        document.getElementById('total-bar-fill').style.width = titanAvg + '%';
-    };
+    window.addLift = () => {
+        lifts.push({ name: "New Lift", start: 0, curr: 0, goalW: 0, goalG: 0, goalS: 0, inc: 2.5, minR: 8, maxR: 12, sets: [8,8,8] });
+        openModal(lifts.length - 1);
+    }
 
     window.openModal = (i) => {
         currentEditIdx = i;
-        const l = window.lifts[i];
+        const l = lifts[i];
         document.getElementById('eName').value = l.name;
+        document.getElementById('eStart').value = l.start;
         document.getElementById('eCurr').value = l.curr;
-        document.getElementById('eInc').value = l.inc;
         document.getElementById('eGoalW').value = l.goalW;
         document.getElementById('eGoalG').value = l.goalG;
         document.getElementById('eGoalS').value = l.goalS;
+        document.getElementById('eInc').value = l.inc;
         document.getElementById('eMin').value = l.minR;
         document.getElementById('eMax').value = l.maxR;
         document.getElementById('editModal').style.display = 'flex';
-    };
+    }
 
     window.saveEdit = () => {
-        const l = window.lifts[currentEditIdx];
+        const l = lifts[currentEditIdx];
         l.name = document.getElementById('eName').value;
-        l.curr = parseFloat(document.getElementById('eCurr').value);
-        l.goalW = parseFloat(document.getElementById('eGoalW').value);
-        l.goalG = parseFloat(document.getElementById('eGoalG').value);
-        l.goalS = parseFloat(document.getElementById('eGoalS').value);
-        l.inc = parseFloat(document.getElementById('eInc').value);
-        l.minR = parseInt(document.getElementById('eMin').value);
-        l.maxR = parseInt(document.getElementById('eMax').value);
+        l.start = parseFloat(document.getElementById('eStart').value) || 0;
+        l.curr = parseFloat(document.getElementById('eCurr').value) || 0;
+        l.goalW = parseFloat(document.getElementById('eGoalW').value) || 0;
+        l.goalG = parseFloat(document.getElementById('eGoalG').value) || 0;
+        l.goalS = parseFloat(document.getElementById('eGoalS').value) || 0;
+        l.inc = parseFloat(document.getElementById('eInc').value) || 2.5;
+        l.minR = parseInt(document.getElementById('eMin').value) || 0;
+        l.maxR = parseInt(document.getElementById('eMax').value) || 0;
         closeModal();
-    };
+    }
+
+    window.updateReps = (li, si, val) => {
+        lifts[li].sets[si] = parseInt(val) || 0;
+        render();
+    }
 
     window.closeModal = () => {
         document.getElementById('editModal').style.display = 'none';
         render();
-    };
+    }
 
-    window.addLift = () => {
-        window.lifts.push({ name: "New Exercise", curr: 0, inc: 2.5, goalW: 0, goalG: 0, goalS: 0, minR: 8, maxR: 12, sets: [8,8,8] });
-        openModal(window.lifts.length - 1);
-    };
+    window.deleteLift = () => {
+        if(confirm("Delete this?")) {
+            lifts.splice(currentEditIdx, 1);
+            closeModal();
+        }
+    }
+
+    render();
 </script>
 </body>
 </html>
