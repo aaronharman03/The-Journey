@@ -3,58 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Social Progress Tracker</title>
+    <title>Social Progress</title>
     <style>
-        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --dot-off: #333; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; padding-top: 100px; }
+        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-top: 90px; }
         
-        #header { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); padding: 20px; z-index: 1000; border-bottom: 1px solid #222; }
-        .bar-bg { background: #222; border-radius: 4px; height: 8px; width: 100%; margin-top: 8px; }
-        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.3s; border-radius: 4px; }
+        /* Fixed Header */
+        #header { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); padding: 15px 20px; z-index: 1000; border-bottom: 1px solid #222; backdrop-filter: blur(10px); }
+        .bar-bg { background: #222; border-radius: 10px; height: 6px; width: 100%; margin-top: 8px; overflow: hidden; }
+        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #222; }
-        .task-title { font-size: 1.2rem; font-weight: bold; color: var(--accent); margin-bottom: 15px; display: flex; justify-content: space-between; }
+        /* Task Cards */
+        #list { display: flex; flex-direction: column; gap: 10px; }
+        .card { background: var(--card); border-radius: 12px; border: 1px solid #222; overflow: hidden; transition: 0.2s; }
+        .card-header { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .task-info { flex-grow: 1; }
+        .task-name { font-weight: bold; font-size: 1rem; margin-bottom: 4px; }
         
-        .grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        /* Expandable Grid */
+        .expansion { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #0a0a0a; }
+        .card.open .expansion { max-height: 1000px; padding-bottom: 15px; }
+        
+        .day-container { padding: 0 15px; display: flex; flex-direction: column; gap: 8px; }
         .day-row { display: flex; align-items: center; gap: 10px; }
-        .day-label { font-size: 0.7rem; color: #666; width: 40px; }
-        .reps { display: flex; gap: 8px; }
+        .day-label { font-size: 0.65rem; color: #555; width: 35px; text-transform: uppercase; letter-spacing: 1px; }
+        .reps { display: flex; gap: 6px; flex-wrap: wrap; }
         
-        .dot { width: 25px; height: 25px; border-radius: 6px; background: var(--dot-off); cursor: pointer; transition: 0.2s; border: 1px solid #444; }
-        .dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+        /* Interactive Dots */
+        .dot { width: 22px; height: 22px; border-radius: 4px; background: #222; border: 1px solid #333; transition: 0.1s; }
+        .dot.active { background: var(--accent); border-color: var(--accent); }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 2000; }
-        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; }
-        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; margin: 10px 0; box-sizing: border-box; border-radius: 8px; }
-        .btn { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        /* Add Button */
+        .add-btn { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: var(--accent); color: #000; border: none; font-size: 24px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,255,136,0.4); z-index: 100; }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 20px; width: 100%; max-width: 400px; }
+        input { background: #000; border: 1px solid #333; color: #fff; padding: 12px; width: 100%; margin: 10px 0; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div id="header">
-    <div style="display:flex; justify-content:space-between;">
-        <span style="font-size:0.8rem; color:#888;">OVERALL PROGRESS</span>
-        <span id="ov-text" style="color:var(--accent); font-weight:bold;">0%</span>
+    <div style="display:flex; justify-content:space-between; align-items: center;">
+        <span style="font-size:0.7rem; color:#666; font-weight: 900;">OVERALL MASTERY</span>
+        <span id="ov-text" style="color:var(--accent); font-weight:bold; font-size: 1.2rem;">0%</span>
     </div>
     <div class="bar-bg"><div id="ov-bar" class="bar-fill"></div></div>
 </div>
 
 <div id="list"></div>
-<button class="btn" onclick="openModal()" style="margin-top: 20px;">+ ADD NEW TASK</button>
+
+<button class="add-btn" onclick="openModal()">+</button>
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <h3 style="color:var(--accent)">New Task</h3>
-        <input type="text" id="taskName" placeholder="Task Name (e.g. Compliment Strangers)">
-        <input type="number" id="goalDays" placeholder="Goal Days (e.g. 5)">
-        <input type="number" id="goalReps" placeholder="Reps Per Day (e.g. 3)">
-        <button class="btn" onclick="addTask()">CREATE TASK</button>
-        <button class="btn" onclick="closeModal()" style="background:none; color:#888;">Cancel</button>
+        <h3 style="color:var(--accent); margin-top:0;">New Social Task</h3>
+        <input type="text" id="taskName" placeholder="Task Name">
+        <input type="number" id="goalDays" placeholder="Goal Days">
+        <input type="number" id="goalReps" placeholder="Reps Per Day">
+        <button onclick="addTask()" style="background:var(--accent); border:none; padding:15px; width:100%; border-radius:10px; font-weight:bold; margin-top:10px;">START MISSION</button>
+        <button onclick="closeModal()" style="background:none; border:none; color:#555; width:100%; padding:10px;">Cancel</button>
     </div>
 </div>
 
 <script>
-    let tasks = JSON.parse(localStorage.getItem('socialProgress')) || [];
+    let tasks = JSON.parse(localStorage.getItem('socialPWA')) || [];
 
     function openModal() { document.getElementById('modal').style.display = 'flex'; }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
@@ -63,20 +76,21 @@
         const name = document.getElementById('taskName').value;
         const days = parseInt(document.getElementById('goalDays').value);
         const reps = parseInt(document.getElementById('goalReps').value);
-        
         if (name && days && reps) {
-            tasks.push({
-                name,
-                days,
-                repsPerDay: reps,
-                completed: [] // Stores indices of clicked dots
-            });
+            tasks.push({ name, days, repsPerDay: reps, completed: [], open: false });
             saveAndRender();
             closeModal();
+            document.getElementById('taskName').value = '';
         }
     }
 
-    function toggleDot(taskIdx, dotIdx) {
+    function toggleCard(i) {
+        tasks[i].open = !tasks[i].open;
+        saveAndRender();
+    }
+
+    function toggleDot(e, taskIdx, dotIdx) {
+        e.stopPropagation(); // Prevents closing the accordion when clicking a dot
         const t = tasks[taskIdx];
         const index = t.completed.indexOf(dotIdx);
         if (index > -1) t.completed.splice(index, 1);
@@ -85,11 +99,10 @@
     }
 
     function saveAndRender() {
-        localStorage.setItem('socialProgress', JSON.stringify(tasks));
+        localStorage.setItem('socialPWA', JSON.stringify(tasks));
         const list = document.getElementById('list');
         list.innerHTML = '';
-        let totalDots = 0;
-        let totalCompleted = 0;
+        let totalDots = 0, totalCompleted = 0;
 
         tasks.forEach((t, tIdx) => {
             const taskTotal = t.days * t.repsPerDay;
@@ -100,23 +113,30 @@
 
             let gridHtml = '';
             for (let d = 0; d < t.days; d++) {
-                gridHtml += `<div class="day-row"><div class="day-label">Day ${d+1}</div><div class="reps">`;
+                gridHtml += `<div class="day-row"><div class="day-label">D${d+1}</div><div class="reps">`;
                 for (let r = 0; r < t.repsPerDay; r++) {
                     const dotIdx = (d * t.repsPerDay) + r;
                     const active = t.completed.includes(dotIdx) ? 'active' : '';
-                    gridHtml += `<div class="dot ${active}" onclick="toggleDot(${tIdx}, ${dotIdx})"></div>`;
+                    gridHtml += `<div class="dot ${active}" onclick="toggleDot(event, ${tIdx}, ${dotIdx})"></div>`;
                 }
                 gridHtml += `</div></div>`;
             }
 
             list.innerHTML += `
-                <div class="card">
-                    <div class="task-title">
-                        ${t.name}
-                        <span style="font-size:0.8rem; color:#888" onclick="deleteTask(${tIdx})">✕</span>
+                <div class="card ${t.open ? 'open' : ''}">
+                    <div class="card-header" onclick="toggleCard(${tIdx})">
+                        <div class="task-info">
+                            <div class="task-name">${t.name}</div>
+                            <div class="bar-bg" style="width: 80%"><div class="bar-fill" style="width:${taskPct}%"></div></div>
+                        </div>
+                        <div style="color:#444">${Math.round(taskPct)}%</div>
                     </div>
-                    <div class="grid">${gridHtml}</div>
-                    <div class="bar-bg"><div class="bar-fill" style="width:${taskPct}%"></div></div>
+                    <div class="expansion">
+                        <div class="day-container">${gridHtml}</div>
+                        <div style="text-align:center; padding-top:15px;">
+                            <span style="color:#ff5555; font-size:0.7rem;" onclick="deleteTask(${tIdx})">DELETE MISSION</span>
+                        </div>
+                    </div>
                 </div>`;
         });
 
@@ -126,7 +146,7 @@
     }
 
     function deleteTask(i) {
-        if(confirm("Delete task?")) {
+        if(confirm("Delete this mission?")) {
             tasks.splice(i, 1);
             saveAndRender();
         }
