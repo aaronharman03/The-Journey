@@ -1,47 +1,64 @@
-<div id="home-screen">
-    
-    <header style="text-align: center; padding: 40px 20px; border-bottom: 1px solid #222;">
-        <h1 style="margin: 0; font-size: 0.8rem; color: #666; letter-spacing: 2px; text-transform: uppercase;">Total Human Status</h1>
-        <div id="total-human-percent" style="font-size: 3.5rem; font-weight: 900; color: #00ff88; margin: 10px 0;">42%</div>
-        <div class="bar-bg" style="height: 12px; background: #222; border-radius: 10px;">
-            <div id="total-bar-fill" style="width: 42%; height: 100%; background: #00ff88; border-radius: 10px; transition: 0.5s;"></div>
-        </div>
-        <p style="margin-top: 15px; color: #888;">Rank: <span style="color: #fff; font-weight: bold;">Warrior</span></p>
-    </header>
-
-    <main style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Total Human</title>
+    <style>
+        :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --panel: #1a1a1a; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; -webkit-tap-highlight-color: transparent; }
         
-        <div class="pillar-card" onclick="location.href='physique.html'" style="background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center;">
-            <div style="font-size: 0.7rem; color: #666; margin-bottom: 10px; letter-spacing: 1px;">THE TITAN</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">Body</div>
-            <div class="bar-bg" style="height: 4px; background: #222;">
-                <div style="width: 65%; height: 100%; background: #00ff88;"></div>
-            </div>
-        </div>
+        /* Layout Helpers */
+        .page { display: none; padding: 20px; }
+        .active { display: block; }
+        .bar-bg { background: #222; border-radius: 10px; height: 8px; width: 100%; overflow: hidden; }
+        .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease; }
 
-        <div class="pillar-card" onclick="location.href='business.html'" style="background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center;">
-            <div style="font-size: 0.7rem; color: #666; margin-bottom: 10px; letter-spacing: 1px;">THE ARCHITECT</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">Empire</div>
-            <div class="bar-bg" style="height: 4px; background: #222;">
-                <div style="width: 30%; height: 100%; background: #00ff88;"></div>
-            </div>
-        </div>
+        /* Home Screen Styles */
+        .pillar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .pillar-card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center; cursor: pointer; }
+        
+        /* reuse your existing card styles for the lifting section */
+        .lift-card { background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 16px; border: 1px solid #222; }
+        .btn-back { background: none; border: 1px solid #333; color: #888; padding: 8px 15px; border-radius: 8px; margin-bottom: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
 
-        <div class="pillar-card" onclick="location.href='social.html'" style="background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center;">
-            <div style="font-size: 0.7rem; color: #666; margin-bottom: 10px; letter-spacing: 1px;">THE ENVOY</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">Social</div>
-            <div class="bar-bg" style="height: 4px; background: #222;">
-                <div style="width: 20%; height: 100%; background: #00ff88;"></div>
-            </div>
-        </div>
+    <div id="home-page" class="page active">
+        <header style="text-align: center; padding: 40px 0;">
+            <div style="font-size: 0.8rem; color: #666; letter-spacing: 2px;">TOTAL HUMAN</div>
+            <div id="total-val" style="font-size: 3.5rem; font-weight: 900; color: var(--accent);">0%</div>
+            <div class="bar-bg" style="height: 12px;"><div id="total-bar" class="bar-fill"></div></div>
+        </header>
 
-        <div class="pillar-card" onclick="location.href='spirit.html'" style="background: #111; padding: 25px; border-radius: 20px; border: 1px solid #222; text-align: center;">
-            <div style="font-size: 0.7rem; color: #666; margin-bottom: 10px; letter-spacing: 1px;">THE MONK</div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">Mind</div>
-            <div class="bar-bg" style="height: 4px; background: #222;">
-                <div style="width: 80%; height: 100%; background: #00ff88;"></div>
+        <div class="pillar-grid">
+            <div class="pillar-card" onclick="showPage('body-page')">
+                <div style="color: #666; font-size: 0.7rem;">THE TITAN</div>
+                <strong>Body</strong>
             </div>
-        </div>
+            <div class="pillar-card" onclick="alert('Business Section Coming Soon')">
+                <div style="color: #666; font-size: 0.7rem;">THE ARCHITECT</div>
+                <strong>Empire</strong>
+            </div>
+            </div>
+    </div>
 
-    </main>
-</div>
+    <div id="body-page" class="page">
+        <button class="btn-back" onclick="showPage('home-page')">← Back</button>
+        <h2 style="color: var(--accent);">Titan Progress</h2>
+        <div id="lift-list">
+            </div>
+    </div>
+
+    <script>
+        // Simple Navigation Logic
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // We will integrate your Firebase/Lifting logic here next
+    </script>
+</body>
+</html>
