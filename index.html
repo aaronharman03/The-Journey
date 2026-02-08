@@ -12,26 +12,22 @@
         :root { --bg: #000; --card: #111; --accent: #00ff88; --text: #fff; --error: #ff4444; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-top: 100px; }
         
-        /* Auth Screen */
         #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .auth-card { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; border: 1px solid #222; text-align: center; }
         
-        /* Layout */
         #header { position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.95); padding: 15px 20px; z-index: 1000; border-bottom: 1px solid #222; backdrop-filter: blur(10px); }
         .bar-bg { background: #222; border-radius: 10px; height: 6px; width: 100%; margin-top: 8px; overflow: hidden; }
         .bar-fill { background: var(--accent); height: 100%; width: 0%; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
         #list { display: flex; flex-direction: column; gap: 12px; }
         
-        /* Card Layering Fixes */
         .card { background: var(--card); border-radius: 14px; border: 1px solid #222; position: relative; z-index: 1; transition: z-index 0s; }
-        .card.active-card { z-index: 2000; } /* Forces card to front when menu is open */
+        .card.active-card { z-index: 2000; }
         
         .card-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; position: relative; }
         .task-name { font-weight: bold; font-size: 1rem; margin-bottom: 6px; color: #eee; }
         .pct-val { color: #555; font-size: 0.85rem; font-weight: bold; margin-left: 10px; }
         
-        /* 3-Dot Menu Dropdown */
         .menu-container { position: relative; z-index: 100; }
         .menu-dots { background: none; border: none; color: #444; font-size: 1.5rem; padding: 5px 10px; cursor: pointer; outline: none; }
         .menu-dropdown { 
@@ -206,7 +202,6 @@
         const card = menu.closest('.card');
         const isShown = menu.classList.contains('show');
         
-        // Reset others
         document.querySelectorAll('.menu-dropdown').forEach(m => m.classList.remove('show'));
         document.querySelectorAll('.card').forEach(c => c.classList.remove('active-card'));
         
@@ -246,14 +241,18 @@
     function render() {
         const list = document.getElementById('list');
         list.innerHTML = '';
-        let totalDots = 0, totalCompleted = 0;
+        
+        let combinedPercentageSum = 0; // NEW: Sum of all percentages to find average
 
         tasks.forEach((t, tIdx) => {
-            const taskTotal = t.days * t.repsPerDay;
-            const taskDone = t.completed.length;
-            const taskPct = (taskDone / taskTotal) * 100 || 0;
-            totalDots += taskTotal;
-            totalCompleted += taskDone;
+            const taskTotalDots = t.days * t.repsPerDay;
+            const taskDoneDots = t.completed.length;
+            
+            // Calculate percentage for this specific task
+            const taskPct = taskTotalDots > 0 ? (taskDoneDots / taskTotalDots) * 100 : 0;
+            
+            // Add to our total sum for global average
+            combinedPercentageSum += taskPct;
 
             let gridHtml = '';
             for (let d = 0; d < t.days; d++) {
@@ -288,7 +287,8 @@
                 </div>`;
         });
 
-        const overall = totalDots > 0 ? (totalCompleted / totalDots * 100).toFixed(1) : 0;
+        // NEW: Average the percentages of all tasks
+        const overall = tasks.length > 0 ? (combinedPercentageSum / tasks.length).toFixed(1) : "0.0";
         document.getElementById('ov-text').innerText = overall + '%';
         document.getElementById('ov-bar').style.width = overall + '%';
     }
